@@ -4,5 +4,21 @@ Task: Develop a web application for creating, customizing, and managing no- code
 ## backEnd
 
 ## Tech Stack :
-  nodejs,express,mongoose
   
+- Node.js
+- Express
+- Mongoose
+- Nodemon
+- CORS
+- dotenv
+- CSV Stringify
+  
+
+## Tech Stack :
+
+## frontend
+
+- React
+- React Router DOM 
+- TailwindCSS 4
+
