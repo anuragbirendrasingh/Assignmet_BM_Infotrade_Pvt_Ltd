@@ -6,6 +6,7 @@ import FieldPreview from "../components/FieldPreview";
 
 export default function CreateForm() {
   const { createForm, updateForm, forms, loadForms } = useForms();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [fields, setFields] = useState([]);
@@ -13,64 +14,66 @@ export default function CreateForm() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const editId = searchParams.get("editId");
 
-  // Load forms if not already loaded
+  // 🚀 This is SLUG, not ID
+  const editSlug = searchParams.get("editId");
+
+  // Load forms initially
   useEffect(() => {
     if (forms.length === 0) loadForms();
   }, []);
 
-  // If editing mode, load existing form
+  // Load form details if editing
   useEffect(() => {
-    if (!editId) return;
+    if (!editSlug) return;
 
-    const f = forms.find((x) => x._id === editId);
+    // Try from context first
+    const f = forms.find((x) => x.slug === editSlug);
 
     if (f) {
       setTitle(f.title || "");
       setDescription(f.description || "");
       setFields(f.fields || []);
     } else {
-      // Fallback to backend fetch
+      // Fetch from backend if needed
       (async () => {
         try {
-          const data = await fetch(
-            `${import.meta.env.VITE_API_BASE || "http://localhost:7005/api"}/forms/${editId}`
+          const res = await fetch(
+            `${import.meta.env.VITE_API_BASE || "http://localhost:7005/api"}/forms/${editSlug}`
           );
-          if (!data.ok) return;
 
-          const json = await data.json();
+          if (!res.ok) return;
+
+          const json = await res.json();
           setTitle(json.title || "");
           setDescription(json.description || "");
           setFields(json.fields || []);
         } catch (err) {
-          console.error(err);
+          console.error("Load form failed:", err);
         }
       })();
     }
-  }, [editId, forms]);
+  }, [editSlug, forms]);
 
-
-  // SAVE FORM
+  // Save / Update form
   async function handleSave() {
-    if (!title.trim()) return alert("Title required");
+    if (!title.trim()) return alert("Title required!");
 
     setSaving(true);
 
-    try {
-      const payload = { title, description, fields };
+    const payload = { title, description, fields };
 
-      if (editId) {
-        // --- Update Existing Form ---
-        await updateForm(editId, payload);
-        alert("Form updated successfully");
-        navigate("/manage");
+    try {
+      if (editSlug) {
+        // UPDATE using slug
+        await updateForm(editSlug, payload);
+        alert("Form updated!");
       } else {
-        // --- Create New Form ---
         await createForm(payload);
-        alert("Form created successfully");
-        navigate("/manage");
+        alert("Form created!");
       }
+
+      navigate("/manage");
     } catch (err) {
       console.error(err);
       alert("Error saving form");
@@ -79,13 +82,11 @@ export default function CreateForm() {
     }
   }
 
-
   return (
     <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* LEFT: Form Controls */}
       <div className="border p-4 rounded-lg bg-white shadow">
         <h2 className="text-xl font-semibold mb-3">
-          {editId ? "Edit Form" : "Create New Form"}
+          {editSlug ? "Edit Form" : "Create New Form"}
         </h2>
 
         <input
@@ -110,11 +111,10 @@ export default function CreateForm() {
           onClick={handleSave}
           className="mt-4 bg-blue-600 text-white px-4 py-2 rounded w-full"
         >
-          {saving ? "Saving..." : editId ? "Update Form" : "Create Form"}
+          {saving ? "Saving..." : editSlug ? "Update Form" : "Create Form"}
         </button>
       </div>
 
-      {/* RIGHT: Live Preview */}
       <div className="border p-4 rounded-lg bg-white shadow">
         <h2 className="text-xl font-semibold mb-3">Live Preview</h2>
         <FieldPreview fields={fields} />
@@ -122,4 +122,5 @@ export default function CreateForm() {
     </div>
   );
 }
+
 

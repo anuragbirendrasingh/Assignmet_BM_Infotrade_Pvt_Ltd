@@ -5,20 +5,20 @@ import { useForms } from "../context/FormContext";
 export default function ManageForms() {
   const { forms, loading, deleteForm, duplicateForm } = useForms();
 
-  async function exportCSV(id, title) {
+  async function exportCSV(slug, title) {
     try {
       const url = `${
-        import.meta.env.MONGO_URI || "http://localhost:7005/api"
-      }/forms/${id}/responses/export`;
+        import.meta.env.VITE_API_BASE || "http://localhost:7005/api"
+      }/forms/${slug}/responses/export`;
+
       const res = await fetch(url);
       if (!res.ok) throw new Error("Export failed");
+
       const blob = await res.blob();
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `${title || "responses"}-${id}.csv`;
-      document.body.appendChild(a);
+      a.download = `${title}-${slug}.csv`;
       a.click();
-      a.remove();
     } catch (err) {
       alert("Export error: " + err.message);
     }
@@ -29,19 +29,22 @@ export default function ManageForms() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Manage Forms</h2>
+
       {forms.length === 0 && (
         <div className="text-sm text-gray-500">No forms yet</div>
       )}
+
       <div className="space-y-3">
         {forms.map((f) => (
           <div
-            key={f._id}
+            key={f.slug}
             className="bg-white p-3 rounded shadow flex items-center justify-between"
           >
             <div>
               <div className="font-medium">{f.title}</div>
               <div className="text-xs text-gray-500">{f.slug}</div>
             </div>
+
             <div className="space-x-2">
               <Link
                 to={`/forms/${f.slug}`}
@@ -49,28 +52,32 @@ export default function ManageForms() {
               >
                 Open
               </Link>
+
               <Link
-                to={`/create?editId=${f._id}`}
+                to={`/create?editId=${f.slug}`}
                 className="px-2 py-1 border rounded text-sm"
               >
                 Edit
               </Link>
+
               <button
-                onClick={() => duplicateForm(f._id)}
+                onClick={() => duplicateForm(f.slug)}
                 className="px-2 py-1 border rounded text-sm"
               >
                 Duplicate
               </button>
+
               <button
                 onClick={() => {
-                  if (confirm("Delete?")) deleteForm(f._id);
+                  if (confirm("Delete?")) deleteForm(f.slug);
                 }}
                 className="px-2 py-1 text-red-500 text-sm"
               >
                 Delete
               </button>
+
               <button
-                onClick={() => exportCSV(f._id, f.title)}
+                onClick={() => exportCSV(f.slug, f.title)}
                 className="px-2 py-1 border rounded text-sm"
               >
                 Export CSV
@@ -82,3 +89,5 @@ export default function ManageForms() {
     </div>
   );
 }
+
+

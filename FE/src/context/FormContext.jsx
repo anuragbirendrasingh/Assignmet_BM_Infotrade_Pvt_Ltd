@@ -11,6 +11,7 @@ export function FormProvider({ children }) {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Load all forms
   async function loadForms() {
     setLoading(true);
     try {
@@ -28,33 +29,55 @@ export function FormProvider({ children }) {
     loadForms();
   }, []);
 
+  // Create form
   async function createForm(payload) {
-    const res = await fetchJSON("/forms", { method: "POST", body: JSON.stringify(payload) });
-    setForms(prev => [res, ...prev]);
+    const res = await fetchJSON("/forms", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    setForms((prev) => [res, ...prev]);
     return res;
   }
 
-  async function updateForm(id, payload) {
-    const res = await fetchJSON(`/forms/${id}`, { method: "PUT", body: JSON.stringify(payload) });
-    setForms(prev => prev.map(f => (f._id === id ? res : f)));
+  // Update form by SLUG
+  async function updateForm(slug, payload) {
+    const res = await fetchJSON(`/forms/${slug}`, {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    });
+    setForms((prev) => prev.map((f) => (f.slug === slug ? res : f)));
     return res;
   }
 
-  async function deleteForm(id) {
-    await fetchJSON(`/forms/${id}`, { method: "DELETE" });
-    setForms(prev => prev.filter(f => f._id !== id));
+  // Delete form by SLUG
+  async function deleteForm(slug) {
+    await fetchJSON(`/forms/${slug}`, { method: "DELETE" });
+    setForms((prev) => prev.filter((f) => f.slug !== slug));
   }
 
-  async function duplicateForm(id) {
-    const res = await fetchJSON(`/forms/${id}/duplicate`, { method: "POST" });
-    setForms(prev => [res, ...prev]);
+  // Duplicate form by SLUG
+  async function duplicateForm(slug) {
+    const res = await fetchJSON(`/forms/${slug}/duplicate`, { method: "POST" });
+    setForms((prev) => [res, ...prev]);
+    return res;
   }
 
   return (
-    <FormContext.Provider value={{
-      forms, loading, loadForms, createForm, updateForm, deleteForm, duplicateForm
-    }}>
+    <FormContext.Provider
+      value={{
+        forms,
+        loading,
+        loadForms,
+        createForm,
+        updateForm,
+        deleteForm,
+        duplicateForm,
+      }}
+    >
       {children}
     </FormContext.Provider>
   );
 }
+
+
+

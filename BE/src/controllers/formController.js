@@ -3,7 +3,7 @@
 const Form = require("../models/Form");
 const generateUniqueSlug = require("../utils/generateUniqueSlug");
 
-// 👉 Create New Form
+//  Create New Form
 exports.createForm = async (req, res) => {
   try {
     const { title, description, fields, settings } = req.body;
@@ -27,7 +27,7 @@ exports.createForm = async (req, res) => {
   }
 };
 
-// 👉 Get All Forms
+//  Get All Forms
 exports.listForms = async (req, res) => {
   try {
     const forms = await Form.find().sort({ createdAt: -1 });
@@ -37,7 +37,7 @@ exports.listForms = async (req, res) => {
   }
 };
 
-// 👉 Get Form By Slug
+//  Get Form By Slug
 exports.getFormBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -54,7 +54,7 @@ exports.getFormBySlug = async (req, res) => {
   }
 };
 
-// 👉 Update Form
+//  Update Form
 exports.updateForm = async (req, res) => {
   try {
     const { slug } = req.params;
@@ -76,7 +76,7 @@ exports.updateForm = async (req, res) => {
   }
 };
 
-// 👉 Duplicate Form
+//  Duplicate Form
 exports.duplicateForm = async (req, res) => {
   try {
     const { slug } = req.params;
